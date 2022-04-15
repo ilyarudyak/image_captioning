@@ -84,11 +84,18 @@ class Attention(nn.Module):
         :param decoder_hidden: previous decoder output, a tensor of dimension (batch_size, decoder_dim)
         :return: attention weighted encoding, weights
         """
-        att1 = self.encoder_att(encoder_out)  # (batch_size, num_pixels, attention_dim)
-        att2 = self.decoder_att(decoder_hidden)  # (batch_size, attention_dim)
-        att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
-        alpha = self.softmax(att)  # (batch_size, num_pixels)
-        attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  # (batch_size, encoder_dim)
+        # (batch_size, num_pixels, attention_dim)
+        att1 = self.encoder_att(encoder_out)  
+        # (batch_size, attention_dim)
+        att2 = self.decoder_att(decoder_hidden)
+        # (batch_size, num_pixels)  
+        att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  
+
+        # (batch_size, num_pixels)
+        alpha = self.softmax(att)  
+
+        # (batch_size, encoder_dim)
+        attention_weighted_encoding = (encoder_out * alpha.unsqueeze(2)).sum(dim=1)  
 
         return attention_weighted_encoding, alpha
 
@@ -146,8 +153,10 @@ class DecoderWithAttention(nn.Module):
 
         # initial states
         # (BS, encoder_dim) -> (BS, decoder_dim)
-        self.init_h = nn.Linear(encoder_dim, decoder_dim)  # linear layer to find initial hidden state of LSTMCell
-        self.init_c = nn.Linear(encoder_dim, decoder_dim)  # linear layer to find initial cell state of LSTMCell
+        # linear layer to find initial hidden state of LSTMCell
+        self.init_h = nn.Linear(encoder_dim, decoder_dim)
+        # linear layer to find initial cell state of LSTMCell  
+        self.init_c = nn.Linear(encoder_dim, decoder_dim)  
 
         self.dropout = nn.Dropout(p=self.dropout)
 
@@ -214,7 +223,7 @@ class DecoderWithAttention(nn.Module):
         """
 
         ################################################################################################
-        # Step (1): getting Encoder output; reshape and sor it;
+        # Step (1): getting Encoder output; reshape and sort it;
         ################################################################################################
 
         batch_size = encoder_out.size(0)
@@ -299,8 +308,6 @@ class DecoderWithAttention(nn.Module):
 
         # alphas - we use them in loss correction (BS, max_caps_len, num_pixels) 
         return predictions, encoded_captions, decode_lengths, alphas, sort_ind
-
-
 
 
 

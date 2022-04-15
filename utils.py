@@ -52,10 +52,15 @@ def create_input_files(
     # so we need this counter
     word_freq = Counter()
 
+    # data['images'] contains 8000 dictionaries (flickr8k)
+    # img is a dict with keys: ['sentids', 'imgid', 'sentences', 'split', 'filename']
     for img in data['images']:
         captions = []
+        # img['sentences'] is list of dictionaries usually with len = 5 (5 captions per image)
+        # c is a dictionary with keys: ['tokens', 'raw', 'imgid', 'sentid']
         for c in img['sentences']:
             # Update word frequency
+            # c['tokens'] contains tokenized caption as a list of words
             word_freq.update(c['tokens'])
             # Skip captions with len > max_len 
             if len(c['tokens']) <= max_len:
@@ -99,7 +104,7 @@ def create_input_files(
 
     ########################################################################################################
 
-    # Step (4). Create h5 file
+    # Step (4). Create hdf5 file
     # Sample captions for each image, save images to HDF5 file, and captions and their lengths to JSON files
     seed(123)
     for impaths, imcaps, split in [(train_image_paths, train_image_captions, 'TRAIN'),
@@ -232,7 +237,8 @@ def clip_gradient(optimizer, grad_clip):
                 param.grad.data.clamp_(-grad_clip, grad_clip)
 
 
-def save_checkpoint(data_name, epoch, epochs_since_improvement, encoder, decoder, encoder_optimizer, decoder_optimizer,
+def save_checkpoint(data_name, epoch, epochs_since_improvement, 
+    encoder, decoder, encoder_optimizer, decoder_optimizer,
                     bleu4, is_best):
     """
     Saves model checkpoint.
@@ -311,3 +317,6 @@ def accuracy(scores, targets, k):
     correct = ind.eq(targets.view(-1, 1).expand_as(ind))
     correct_total = correct.view(-1).float().sum()  # 0D tensor
     return correct_total.item() * (100.0 / batch_size)
+
+
+

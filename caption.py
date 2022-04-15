@@ -147,7 +147,8 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
         # (4-03) Add top_k_scores
         # when step = 1 top_k_scores contains 0 and we don't change scores
-        scores = top_k_scores.expand_as(scores) + scores  # (s, vocab_size)
+        # (s, vocab_size)
+        scores = top_k_scores.expand_as(scores) + scores  
 
 
         # (4-04) Choose top_k_scores
